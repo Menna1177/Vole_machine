@@ -99,5 +99,5 @@ void Machine::OutputState()
         cout << "\n";
     }
 
-    cout << "Program Counter: " << hex << uppercase << setfill('0') << setw(2) << cpu.getPC() << "\n";
+    cout << "Program Counter: " << hex << uppercase << setfill('0') << setw(2) << cpu.getPC() << "\n\n\n";
 }
