@@ -6,11 +6,11 @@
 #include "CPU.h"
 #include <string>
 #include<CU.h>
-
+using namespace std ;
 class Machine {
 public:
     Machine();
-    void loadProgramFromFile(const std::string& filename);
+    void loadProgramFromFile(const string& filename);
     void run();
     void runStepByStep();
     void displayStatus();
