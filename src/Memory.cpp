@@ -2,7 +2,7 @@
 #include "Memory.h"
 using namespace std ;
 
-Memory::Memory(int rows, int cols) : memoryCells(rows, vector<std::string>(cols, "00")) {} // Initialize memory cells to "00"
+Memory::Memory(int rows, int cols) : memoryCells(rows, vector<string>(cols, "00")) {} // Initialize memory cells to "00"
 
 void Memory::setCell(int row, int col, const string& value) {
     if (row < 0 || row >= memoryCells.size() || col < 0 || col >= memoryCells[row].size()) {
