@@ -56,7 +56,7 @@ void CPU::execute(const string& opcode, const string& operand, Register& reg, Me
             cu.store(r, xy, reg, mem);
 
             if (xy == 0x00){
-                cout << "Contents of Memory 00: " << reg.getCell(r) << endl;
+                cout << "Contents at Memory 0x00: " << reg.getCell(r) << endl;
             }
         }
         else {
