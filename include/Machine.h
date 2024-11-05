@@ -1,25 +1,28 @@
 #ifndef MACHINE_H
 #define MACHINE_H
 
-#include "CPU.h"
 #include "Memory.h"
+#include "Register.h"
+#include "CPU.h"
+#include "CU.h"
 #include <iostream>
-#include <string>
 
 using namespace std;
 
-class Machine {
-public:
-    Machine();
-    Machine(CPU* cpu, Memory* memo);
-    virtual ~Machine();
+class Machine
+{
+    public:
+        Machine();
+        void loadProgramFile(const string& filename);
+        void run();
+        void runStepByStep();
+        void OutputState();
 
-    void loadProgramFile(const string& fileName);
-    void outputState();
-
-private:
-    CPU* prossor;
-    Memory* memory;
+    private:
+        Memory memory;
+        Register registers;
+        CPU cpu;
+        CU cu;
 };
 
-#endif
+#endif // MACHINE_H
