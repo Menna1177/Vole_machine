@@ -27,7 +27,7 @@ void Memory::printMemory() const {
 
     cout << "\n   ";
     for (int col = 0; col < memoryCells[0].size(); ++col) {
-        cout << "----h"; // Print divider
+        cout << "----"; // Print divider
     }
 
    cout << "\n";
