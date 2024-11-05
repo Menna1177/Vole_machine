@@ -7,9 +7,6 @@
 class MainUI
 {
     public:
-        string inputFileName();
-        void displayMenu();
-        void inputChoice();
         void run();
 };
 
