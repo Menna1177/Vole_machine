@@ -1,0 +1,76 @@
+# depslib dependency file v1.0
+1730789752 source:c:\users\public\downloads\projects\vole\src\alu.cpp
+	"ALU.h"
+	<iostream>
+	<sstream>
+	<iomanip>
+
+1730789752 c:\users\public\downloads\projects\vole\include\alu.h
+	<iostream>
+
+1730789752 source:c:\users\public\downloads\projects\vole\main.cpp
+	"MainUI.h"
+
+1730789752 c:\users\public\downloads\projects\vole\include\mainui.h
+	"Machine.h"
+	<string>
+
+1730791084 c:\users\public\downloads\projects\vole\include\machine.h
+	"Memory.h"
+	"Register.h"
+	"CPU.h"
+	<string>
+	<CU.h>
+
+1730791403 c:\users\public\downloads\projects\vole\include\memory.h
+	<iostream>
+	<vector>
+	<iomanip>
+
+1730791442 c:\users\public\downloads\projects\vole\include\register.h
+	<iostream>
+	<vector>
+	<iomanip>
+
+1730789752 c:\users\public\downloads\projects\vole\include\cpu.h
+	<iostream>
+	<utility>
+	"Memory.h"
+
+1730790372 c:\users\public\downloads\projects\vole\include\cu.h
+	<string>
+	"Register.h"
+	"Memory.h"
+
+1730789752 source:c:\users\public\downloads\projects\vole\src\cpu.cpp
+	"CPU.h"
+	<stdexcept>
+
+1730789752 source:c:\users\public\downloads\projects\vole\src\cu.cpp
+	"CU.h"
+	"ALU.h"
+	<stdexcept>
+
+1730790039 source:c:\users\public\downloads\projects\vole\src\mainui.cpp
+	"MainUI.h"
+	"Machine.h"
+	<iostream>
+	<stdexcept>
+
+1730791696 source:c:\users\public\downloads\projects\vole\src\memory.cpp
+	"Memory.h"
+
+1730791424 source:c:\users\public\downloads\projects\vole\src\register.cpp
+	"Register.h"
+
+1730791274 source:c:\users\public\downloads\projects\vole\src\machine.cpp
+	"machine.h"
+	<fstream>
+	<iostream>
+	<iomanip>
+	<stdexcept>
+	<CPU.h>
+	<CU.h>
+	<utility>
+	<Register.h>
+
