@@ -4,16 +4,15 @@
 #include <string>
 #include "Register.h"
 #include "Memory.h"
-using namespace std ;
+
 class CU
 {
     public:
-        void load();
-        void execute(const string& opcode, const string& operand, Register& registers, Memory& memory);
-    private:
-        string opcode;
-        string operand;
-
+        void load(int indReg, int memAdd, Register& reg, Memory& mem);
+        void load(int indReg, string& content, Register& reg);
+        void store(int indReg, int memAdd, Register& reg, Memory& mem);
+        void movee(int indReg1, int indReg2, Register& reg);
+        void jump(int indReg1, int indReg2, Register& reg, int& pc, int targetAdd);
 };
 
 #endif // CU_H
