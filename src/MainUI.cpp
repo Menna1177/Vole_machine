@@ -1,8 +1,7 @@
 #include "MainUI.h"
-#include "Machine.h"  // تأكد من أن ملف التعريف الخاص بـ Machine مشمول
+#include "Machine.h"
 #include <iostream>
-#include <stdexcept>   // لتضمين runtime_error
-
+#include <stdexcept>
 using namespace std;
 
 
