@@ -1,7 +1,6 @@
 #include "MainUI.h"
-#include "Machine.h"
 #include <iostream>
-#include <stdexcept>
+
 using namespace std;
 
 
@@ -14,7 +13,7 @@ void MainUI::run()
     cin >> filename;
 
     try {
-        machine.loadProgramFromFile(filename);
+        machine.loadProgramFile(filename);
     } catch (const runtime_error& e) {
         cerr << e.what() << endl;
         return;
@@ -28,7 +27,7 @@ void MainUI::run()
 
     if (choice == 1) {
         machine.run();
-        machine.displayStatus();
+        machine.OutputState();
     } else if (choice == 2) {
         machine.runStepByStep();
     } else {
