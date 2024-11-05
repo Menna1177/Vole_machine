@@ -26,7 +26,7 @@ void Machine::loadProgramFile(const string& filename)
         }
     }
     else {
-        throw runtime_error("File failed to open!");  // Just throw without using cerr
+        throw runtime_error("File failed to open!");
     }
 }
 
@@ -35,7 +35,9 @@ void Machine::run()
 {
     try {
         while (true){
-            auto [opcode, operand] = cpu.fetch(memory);
+            pair<string, string> inst = cpu.fetch(memory);
+            string opcode = inst.first;
+            string operand = inst.second;
             cpu.execute(opcode, operand, registers, memory, cu);
         }
     }
@@ -53,7 +55,10 @@ void Machine::runStepByStep()
 {
     try {
         while (true) {
-            auto [opcode, operand] = cpu.fetch(memory);
+            pair<string, string> inst = cpu.fetch(memory);
+            string opcode = inst.first;
+            string operand = inst.second;
+
             cout << "Instruction Register: " << opcode << operand << "\n";
             cpu.execute(opcode, operand, registers, memory, cu);
             OutputState();
