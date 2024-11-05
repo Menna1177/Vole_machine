@@ -1,21 +1,22 @@
-// Memory.h
 #ifndef MEMORY_H
 #define MEMORY_H
 
 #include <iostream>
 #include <vector>
-#include <iomanip>
-using namespace std ;
 
-class Memory {
-public:
-    Memory(int rows, int cols); // Constructor to initialize memory
-    void setCell(int row, int col, const string& value); // Set value at specific location
-    string getCell(int row, int col) const; // Get value at specific location
-    void printMemory() const; // Method to print the memory
+using namespace std;
 
-private:
-    vector<vector<string>> memoryCells; // 2D vector to hold memory cells
+class Memory
+{
+    public:
+
+        Memory(int r, int c);
+        string getCell(int row, int col);
+        void setCell(int row, int col, const string& val);
+
+    private:
+
+        vector<vector<string>> memory;
 };
 
 #endif // MEMORY_H
