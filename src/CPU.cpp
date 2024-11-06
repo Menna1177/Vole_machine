@@ -1,114 +1,128 @@
-#include "CPU.h"
-#include "ALU.h"
+#include "Machine.h"
+#include <fstream>
+#include <iomanip>
 #include <stdexcept>
-#include <iostream>
 
 using namespace std;
 
-CPU::CPU() : pc(0x0A) {}
+Machine::Machine() : memory(16, 16), registers(), cpu(), cu() ,alu(){}
 
-pair<string, string> CPU::fetch(Memory& mem)
+#include <iostream>
+#include <fstream>
+#include <stdexcept>
+#include <string>
+using namespace std;
+
+void Machine::loadProgramFile(const string& filename)
 {
-    if (pc < 256)
+    ifstream file(filename);
+
+    if (file.is_open())
     {
-        string part1 = mem.getCell(pc / 16, pc % 16);
-        string part2 = mem.getCell((pc + 1) / 16, (pc + 1) % 16);
-        string inst = part1 + part2;
-        pc += 2;
-        return {inst.substr(0, 1), inst.substr(1)};
-    }
-    else {
-        throw out_of_range("Program Counter exceeds memory bounds.");
-    }
-}
+        string inst, opcode, operand;
+        int address = 0x0A;
+        bool hasC000 = false;
 
-
-void CPU::execute(const string& opcode, const string& operand, Register& reg, Memory& mem, CU& cu,ALU& alu)
-{
-    int r = stoi(operand.substr(0, 1), nullptr, 16);
-    int s = stoi(operand.substr(1, 1), nullptr, 16);
-    int t = stoi(operand.substr(2, 1), nullptr, 16);
-    int xy = stoi(operand.substr(1), nullptr, 16);
-    int indReg0 = 0;
-    string content;
-
-    if (opcode == "1"){
-        if (xy < 256){
-            cu.load(r, xy, reg, mem);
-        }
-        else {
-            throw out_of_range("Memory address out of bounds, cannot load!");
-        }
-    }
-
-    else if (opcode == "2"){
-        content = operand.substr(1);
-        cu.load(r, content, reg);
-    }
-
-    else if (opcode == "3"){
-        if (xy < 256){
-            cu.store(r, xy, reg, mem);
-
-            if (xy == 0x00){
-                int dec = stoi(reg.getCell(r), nullptr, 16);
-                char ascii = static_cast<char>(dec);
-                cout << "Contents at Memory 0x00: " << reg.getCell(r) << "(Hex), '" << ascii << "'(ASCII)" << endl;
+        while (file >> inst){
+            if (address >= 256){
+                throw out_of_range("Program exceeds memory capacity!");
             }
+
+            memory.setCell(address / 16, address % 16, inst.substr(0, 2));
+            address++;
+            memory.setCell(address / 16, address % 16, inst.substr(2, 2));
+            address++;
+
+            hasC000 = (inst == "C000");
         }
-        else {
-            throw out_of_range("Memory address out of bounds, cannot store!");
+
+        if (!hasC000){
+            if (address >= 256){
+                throw out_of_range("Program exceeds memory capacity!");
+            }
+            memory.setCell(address / 16, address % 16, "C0");
+            address++;
+            memory.setCell(address / 16, address % 16, "00");
         }
     }
-
-    else if (opcode == "4"){
-        cu.movee(s, t, reg);
-    }
-
-    else if (opcode == "5"){
-        reg.setCell(r, alu.addInteger(reg.getCell(s), reg.getCell(t)));
-    }
-
-    else if (opcode == "6"){
-        reg.setCell(r, alu.addFloat(reg.getCell(s), reg.getCell(t)));
-    }
-
-    else if (opcode == "7"){
-        reg.setCell(r, alu.OR(reg.getCell(s), reg.getCell(t)));
-    }
-
-    else if (opcode == "8"){
-        reg.setCell(r, alu.AND(reg.getCell(s), reg.getCell(t)));
-    }
-
-    else if (opcode == "9"){
-        reg.setCell(r, alu.XOR(reg.getCell(s), reg.getCell(t)));
-    }
-
-    else if (opcode == "A"){
-        reg.setCell(r, alu.Rotate(reg.getCell(r), t));
-    }
-
-    else if (opcode == "B"){
-        int targetAdd = stoi(operand.substr(2), nullptr, 16);
-        cu.jump(s, indReg0, reg, pc, targetAdd);
-    }
-
-    else if (opcode == "C"){
-        throw runtime_error("Program halted!");
-    }
-
-    else if (opcode == "D"){
-        int targetAdd = stoi(operand.substr(2), nullptr, 16);
-        cu.jump2(s, indReg0, reg, pc, targetAdd);
-    }
-
     else {
-        //
+        throw runtime_error("File failed to open!");
     }
 }
 
-int CPU::getPC() const
+
+void Machine::run()
 {
-    return pc;
+    try {
+        while (true){
+            pair<string, string> inst = cpu.fetch(memory);
+            string opcode = inst.first;
+            string operand = inst.second;
+            cpu.execute(opcode, operand, registers, memory, cu,alu);
+        }
+    }
+    catch (const exception& e){
+        if (string(e.what()) == "Program halted."){
+            cout << "Program halted!" << endl;
+        }
+        else {
+            cout << "Error: " << e.what() << endl;
+        }
+    }
+}
+
+void Machine::runStepByStep()
+{
+    try {
+        while (true) {
+            pair<string, string> inst = cpu.fetch(memory);
+            string opcode = inst.first;
+            string operand = inst.second;
+
+            cout << "Instruction Register: " << opcode << operand << "\n";
+            cpu.execute(opcode, operand, registers, memory, cu, alu);
+            OutputState();
+        }
+    }
+    catch (const out_of_range& e){
+        cout << "Error: " << e.what() << endl;
+    }
+    catch (const runtime_error& e){
+        if (string(e.what()) == "Program halted."){
+            cout << "Program halted!" << endl;
+        }
+        else {
+            cout << "Error: " << e.what() << endl;
+        }
+    }
+}
+
+void Machine::OutputState()
+{
+    cout << "Registers:\n";
+    for (int i = 0; i < 16; i += 2){
+        cout << "R" << hex << uppercase << i << ": " << registers.getCell(i)
+             << "  R" << hex << uppercase << i + 1 << ": " << registers.getCell(i + 1) << "\n";
+    }
+
+    cout << "Memory:\n    ";
+    for (int col = 0; col < 16; col++){
+        cout << hex << uppercase << col << "  ";
+    }
+
+    cout << "\n   ";
+    for (int col = 0; col < 16; col++){
+        cout << "---";
+    }
+
+    cout << "\n";
+    for (int row = 0; row < 16; row++){
+        cout << hex << uppercase << row << " | ";
+        for (int col = 0; col < 16; col++){
+            cout << memory.getCell(row, col) << " ";
+        }
+        cout << "\n";
+    }
+
+    cout << "Program Counter: " << hex << uppercase << setfill('0') << setw(2) << cpu.getPC() << "\n\n\n";
 }
