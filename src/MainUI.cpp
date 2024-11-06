@@ -25,12 +25,14 @@ void MainUI::run()
     cout << "2. Run program step by step\n";
     cin >> choice;
 
-    if (choice == 1) {
+    if (choice == 1){
         machine.run();
         machine.OutputState();
-    } else if (choice == 2) {
+    }
+    else if (choice == 2){
         machine.runStepByStep();
-    } else {
+    }
+    else {
         cout << "Invalid choice.\n";
     }
 }
