@@ -13,6 +13,9 @@ class CU
         void store(int indReg, int memAdd, Register& reg, Memory& mem);
         void movee(int indReg1, int indReg2, Register& reg);
         void jump(int indReg1, int indReg2, Register& reg, int& pc, int targetAdd);
+        void jump2(int indReg1, int indReg2, Register& reg, int& pc, int targetAdd);
+
 };
+
 
 #endif // CU_H
