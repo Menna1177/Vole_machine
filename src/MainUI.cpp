@@ -12,12 +12,7 @@ void MainUI::run()
     cout << "Enter the filename with Vole program: ";
     cin >> filename;
 
-    try {
-        machine.loadProgramFile(filename);
-    } catch (const runtime_error& e) {
-        cerr << e.what() << endl;
-        return;
-    }
+    machine.loadProgramFile(filename);
 
     int choice;
     cout << "Choose an option:\n";
