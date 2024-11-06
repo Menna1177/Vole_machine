@@ -5,7 +5,7 @@
 
 using namespace std;
 
-Machine::Machine() : memory(16, 16), registers(), cpu(), cu() {}
+Machine::Machine() : memory(16, 16), registers(), cpu(), cu() ,alu(){}
 
 void Machine::loadProgramFile(const string& filename)
 {
@@ -38,7 +38,7 @@ void Machine::run()
             pair<string, string> inst = cpu.fetch(memory);
             string opcode = inst.first;
             string operand = inst.second;
-            cpu.execute(opcode, operand, registers, memory, cu);
+            cpu.execute(opcode, operand, registers, memory, cu,alu);
         }
     }
     catch (const exception& e){
@@ -60,7 +60,7 @@ void Machine::runStepByStep()
             string operand = inst.second;
 
             cout << "Instruction Register: " << opcode << operand << "\n";
-            cpu.execute(opcode, operand, registers, memory, cu);
+            cpu.execute(opcode, operand, registers, memory, cu,alu);
             OutputState();
         }
     }
