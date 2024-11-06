@@ -32,3 +32,10 @@ void CU::jump(int indReg1, int indReg2, Register& reg, int& pc, int targetAdd)
     }
 }
 
+void CU::jump2(int indReg1, int indReg2, Register& reg, int& pc, int targetAdd)
+{
+    if (reg.getCell(indReg1) > reg.getCell(indReg2)){
+        pc = targetAdd;
+    }
+}
+
