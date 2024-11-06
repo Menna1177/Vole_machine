@@ -23,16 +23,16 @@ pair<string, string> CPU::fetch(Memory& mem)
 }
 
 
-void CPU::execute(const string& opcode, const string& operand, Register& reg, Memory& mem, CU& cu)
+void CPU::execute(const string& opcode, const string& operand, Register& reg, Memory& mem, CU& cu,ALU& alu)
 {
-    int r, s, t, xy;
+    int r = stoi(operand.substr(0, 1), nullptr, 16);
+    int s = stoi(operand.substr(1, 1), nullptr, 16);
+    int t = stoi(operand.substr(2, 1), nullptr, 16);
+    int xy = stoi(operand.substr(1), nullptr, 16);
+    int indReg0 = 0;
     string content;
 
-    if (opcode == "1"){ // LOAD from memory to register
-
-        r = stoi(operand.substr(0, 1), nullptr, 16);
-        xy = stoi(operand.substr(1), nullptr, 16);
-
+    if (opcode == "1"){
         if (xy < 256){
             cu.load(r, xy, reg, mem);
         }
@@ -42,16 +42,11 @@ void CPU::execute(const string& opcode, const string& operand, Register& reg, Me
     }
 
     else if (opcode == "2"){
-        r = stoi(operand.substr(0, 1), nullptr, 16);
         content = operand.substr(1);
-
         cu.load(r, content, reg);
     }
 
-    else if (opcode == "3"){ // STORE
-        int r = stoi(operand.substr(0, 1), nullptr, 16);
-        int xy = stoi(operand.substr(1), nullptr, 16);
-
+    else if (opcode == "3"){
         if (xy < 256){
             cu.store(r, xy, reg, mem);
 
@@ -65,27 +60,49 @@ void CPU::execute(const string& opcode, const string& operand, Register& reg, Me
     }
 
     else if (opcode == "4"){
-        s = stoi(operand.substr(1, 1), nullptr, 16);
-        t = stoi(operand.substr(2, 1), nullptr, 16);
         cu.movee(s, t, reg);
     }
 
     else if (opcode == "5"){
-        r = stoi(operand.substr(0, 1), nullptr, 16);
-        s = stoi(operand.substr(1, 1), nullptr, 16);
-        t = stoi(operand.substr(2, 1), nullptr, 16);
-        reg.setCell(r, ALU::add(reg.getCell(s), reg.getCell(t)));
+        reg.setCell(r, alu.addInteger(reg.getCell(s), reg.getCell(t)));
+    }
+
+    else if (opcode == "6"){
+        reg.setCell(r, alu.addFloat(reg.getCell(s), reg.getCell(t)));
+    }
+
+    else if (opcode == "7"){
+        reg.setCell(r, alu.OR(reg.getCell(s), reg.getCell(t)));
+    }
+
+    else if (opcode == "8"){
+        reg.setCell(r, alu.AND(reg.getCell(s), reg.getCell(t)));
+    }
+
+    else if (opcode == "9"){
+        reg.setCell(r, alu.XOR(reg.getCell(s), reg.getCell(t)));
+    }
+
+    else if (opcode == "A"){
+        reg.setCell(r, alu.Rotate(reg.getCell(r), t));
     }
 
     else if (opcode == "B"){
-        int indReg1 = stoi(operand.substr(1, 1), nullptr, 16);
-        int indReg2 = 0;
         int targetAdd = stoi(operand.substr(2), nullptr, 16);
-        cu.jump(indReg1, indReg2, reg, pc, targetAdd);
+        cu.jump(s, indReg0, reg, pc, targetAdd);
     }
 
     else if (opcode == "C"){
         throw runtime_error("Program halted!");
+    }
+
+    else if (opcode == "D"){
+        int targetAdd = stoi(operand.substr(2), nullptr, 16);
+        cu.jump2(s, indReg0, reg, pc, targetAdd);
+    }
+
+    else {
+        //
     }
 }
 
