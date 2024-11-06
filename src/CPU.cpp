@@ -51,7 +51,9 @@ void CPU::execute(const string& opcode, const string& operand, Register& reg, Me
             cu.store(r, xy, reg, mem);
 
             if (xy == 0x00){
-                cout << "Contents at Memory 0x00: " << reg.getCell(r) << endl;
+                int dec = stoi(reg.getCell(r), nullptr, 16);
+                char ascii = static_cast<char>(dec);
+                cout << "Contents at Memory 0x00: " << reg.getCell(r) << "(Hex), '" << ascii << "'(ASCII)" << endl;
             }
         }
         else {
