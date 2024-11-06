@@ -1,6 +1,5 @@
 #ifndef MACHINE_H
 #define MACHINE_H
-
 #include "Memory.h"
 #include "Register.h"
 #include "CPU.h"
@@ -23,6 +22,9 @@ class Machine
         Register registers;
         CPU cpu;
         CU cu;
+        ALU alu;
 };
+
+
 
 #endif // MACHINE_H
