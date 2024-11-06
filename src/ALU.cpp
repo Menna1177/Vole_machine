@@ -4,42 +4,51 @@
 #include <bitset>
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 #include <iomanip>
-
 using namespace std;
 
+// Constructor to initialize ALU object
 ALU::ALU() {
-    // Ctor
+    shiftCounter = 0;  // Initialize shift counter to 0
 }
 
+// Destructor
 ALU::~ALU() {
-    // Dtor
+    // Destructor - No specific cleanup needed
 }
 
-string ALU::normalizeBinary(string& M3) {
-    if (M3.substr(0, 2) == "0.1") {
-        return M3;
+// Function to normalize binary string
+string ALU::normalizeBinary(string M) {
+    shiftCounter = 0;
+    // Check if input is already in normalized form
+    if (M.substr(0, 2) == "0.1") {
+        return M;
     }
-    int firstOnePos = M3.find('1', 0);
-    if (firstOnePos == string::npos) {
+    int firstOnePos = M.find("1", 0);  // Find position of first '1'
+    if (firstOnePos == string::npos) {  // No '1' found, return "0.0"
         return "0.0";
     }
-    if (M3.find('.') == string::npos) {
-        M3 += '.';
+    if (M.find('.') == string::npos) {  // If no dot is found
+        shiftCounter = M.size() - firstOnePos;
+        M = "0." + M.substr(firstOnePos);
+        return M;
     }
-    int dotPos = M3.find('.');
-    while (dotPos != firstOnePos - 1) {
-        if (dotPos < firstOnePos - 1) {
-            swap(M3[dotPos], M3[dotPos + 1]);
-            dotPos++;
-        } else if (dotPos > firstOnePos - 1) {
-            swap(M3[dotPos], M3[dotPos - 1]);
-            dotPos--;
-        }
+    int dotPos = M.find(".", 0);  // Find position of the dot
+    int shiftNeeded = 0;
+    // Adjust the dot position
+    if (dotPos < firstOnePos - 1) {  // Dot is to the left of the first '1'
+        shiftNeeded = firstOnePos - dotPos - 1;
+    } else if (dotPos > firstOnePos - 1) {  // Dot is to the right of the first '1'
+        shiftNeeded = -(dotPos - firstOnePos);
     }
-    return M3;
+
+    shiftCounter = -shiftNeeded;
+    M = "0." + M.substr(firstOnePos);  // Normalize the binary string
+    return M;
 }
 
+// Convert binary string to hexadecimal
 string ALU::binToHex(const string& binary) {
     map<string, char> binaryToHexMap = {
         {"0000", '0'}, {"0001", '1'}, {"0010", '2'}, {"0011", '3'},
@@ -49,6 +58,7 @@ string ALU::binToHex(const string& binary) {
     };
     string hexResult;
     string currentBits = "";
+    // Iterate over binary string in chunks of 4
     for (char bit : binary) {
         currentBits += bit;
         if (currentBits.length() == 4) {
@@ -56,6 +66,7 @@ string ALU::binToHex(const string& binary) {
             currentBits.clear();
         }
     }
+    // Handle remaining bits if they are less than 4
     if (!currentBits.empty()) {
         while (currentBits.length() < 4) {
             currentBits = '0' + currentBits;
@@ -65,6 +76,7 @@ string ALU::binToHex(const string& binary) {
     return hexResult;
 }
 
+// Convert hexadecimal string to binary
 string ALU::hexToBin(const string& hex) {
     map<char, string> hexToBinaryMap = {
         {'0', "0000"}, {'1', "0001"}, {'2', "0010"}, {'3', "0011"},
@@ -74,15 +86,17 @@ string ALU::hexToBin(const string& hex) {
     };
     string binaryResult;
     for (char ch : hex) {
-        binaryResult += hexToBinaryMap[ch];
+        binaryResult += hexToBinaryMap[ch];  // Convert each hex digit to binary
     }
     return binaryResult;
 }
 
+// Convert binary string to decimal (float)
 double ALU::binToDec(const string& binary) {
-    size_t pointPos = binary.find('.');
+    size_t pointPos = binary.find('.');  // Find the position of the decimal point
     double decimalValue = 0.0;
     int power = 0;
+    // Process the integer part (before the dot)
     if (pointPos != string::npos) {
         for (int i = pointPos - 1; i >= 0; --i) {
             if (binary[i] == '1') {
@@ -91,6 +105,7 @@ double ALU::binToDec(const string& binary) {
             power++;
         }
     } else {
+        // No dot, process the whole binary string as integer part
         for (int i = binary.size() - 1; i >= 0; --i) {
             if (binary[i] == '1') {
                 decimalValue += pow(2, power);
@@ -99,6 +114,7 @@ double ALU::binToDec(const string& binary) {
         }
         return decimalValue;
     }
+    // Process the fractional part (after the dot)
     power = -1;
     for (size_t i = pointPos + 1; i < binary.size(); ++i) {
         if (binary[i] == '1') {
@@ -109,62 +125,65 @@ double ALU::binToDec(const string& binary) {
     return decimalValue;
 }
 
-string ALU::intToBin(int integer) {
-    if (integer == 0) return "0";
-    string binary = "";
-    while (integer != 0) {
-        binary += (integer % 2 == 1) ? "1" : "0";
-        integer /= 2;
-    }
-    reverse(binary.begin(), binary.end());
-    return binary;
-}
+// Convert decimal float to binary string
+string ALU::decToBin(float decimal) {
+    if (decimal == 0) return "0";  // Special case for zero
 
-string ALU::fracToBin(float fraction) {
-    if (fraction == 0) return "";
-    string binary = "";
+    int intpart = static_cast<int>(decimal);  // Get the integer part
+    float fracpart = abs(decimal) - abs(intpart);  // Get the fractional part
+
+    // Convert integer part to binary
+    string intbinary = "";
+    while (intpart > 0) {
+        intbinary += (intpart % 2 == 0 ? '0' : '1');
+        intpart /= 2;
+    }
+    string fracbinary = ".";
     int count = 0;
-    while (fraction != 0 && count < 10) {
-        fraction *= 2;
-        int bit = static_cast<int>(fraction);
-        binary += (bit == 1) ? "1" : "0";
-        fraction -= bit;
-        ++count;
+    // Convert fractional part to binary
+    while (fracpart > 0 && count < 5) {
+        fracpart *= 2;
+        if (fracpart >= 1) {
+            fracbinary += '1';
+            fracpart -= 1;
+        } else {
+            fracbinary += '0';
+        }
+        count++;
     }
-    return binary;
+
+    return intbinary + fracbinary;  // Return combined binary string
 }
 
-string ALU::deciToBin(float decimal) {
-    string int_bin = intToBin(static_cast<int>(decimal));
-    string frac_bin = fracToBin(decimal - static_cast<int>(decimal));
-    return int_bin + (frac_bin.empty() ? "" : "." + frac_bin);
-}
-
+// Convert two's complement binary string to decimal
 int ALU::twosComplementToDecimal(const string& binary) {
     if (binary[0] == '0') {
-        return stoi(binary, nullptr, 2);
+        return stoi(binary, nullptr, 2);  // Positive number, just convert
     } else {
         string inverted = binary;
+        // Invert bits for two's complement conversion
         for (char &bit : inverted) {
             bit = (bit == '0') ? '1' : '0';
         }
         int decimal = stoi(inverted, nullptr, 2);
-        return -(decimal + 1);
+        return -(decimal + 1);  // Convert to negative
     }
 }
 
+// Convert decimal number to two's complement binary string
 string ALU::decimalToTwosComplement(int decimal) {
     if (decimal < -128 || decimal > 127) {
         return "Error: Value out of range for 8 bits";
     }
     if (decimal >= 0) {
-        return bitset<8>(decimal).to_string();
+        return bitset<8>(decimal).to_string();  // Positive number, convert to binary
     } else {
         int positiveValue = -decimal;
         string binary = bitset<8>(positiveValue).to_string();
         for (char& bit : binary) {
-            bit = (bit == '0') ? '1' : '0';
+            bit = (bit == '0') ? '1' : '0';  // Invert bits for two's complement
         }
+        // Add 1 to get the two's complement
         for (int i = 7; i >= 0; --i) {
             if (binary[i] == '0') {
                 binary[i] = '1';
@@ -177,55 +196,75 @@ string ALU::decimalToTwosComplement(int decimal) {
     }
 }
 
+// Convert 3-part binary string to decimal float
+float ALU::get_decimal_by3parts(string binary) {
+    int s, e, m;
+    s = (binary[0] == '1' ? -1 : 1);
+    e = binToDec(binary.substr(1, 3));
+    m = binToDec(binary.substr(4));
+    float decimal = s * (m / 16.0) * pow(2, e - 4);
+    return decimal;
+}
+
+// Convert float to binary for floating point sum
+string ALU::sumToBin(float decimal) {
+    string s, e, m, binary = "";
+    binary += (decimal > 0 ? "0" : "1");
+
+    float num = abs(decimal);
+    string bin = decToBin(num);
+    m = normalizeBinary(bin);
+    m = m.erase(0, 2);  // Remove "0."
+
+    int e1 = shiftCounter + 4;
+    e = decToBin(e1);
+    e.erase(e.size() - 1);
+
+    if (e.size() < 3) {
+        while (e.size() != 3) {
+            e = "0" + e;
+        }
+    }
+    binary += e.substr(0, 3);
+
+    if (m.size() < 4) {
+        while (m.size() != 4) {
+            m += "0";
+        }
+    }
+
+    binary += m.substr(0, 4);
+
+    return binary;
+}
+
+// Add two floating-point hexadecimal numbers
 string ALU::addFloat(string hexa1, string hexa2) {
     string bin1 = hexToBin(hexa1);
     string bin2 = hexToBin(hexa2);
-    string S1, S2, S3, M1, M2, M3, E1, E2, E3;
 
-    S1 = bin1[0];
-    E1 = bin1.substr(1, 3);
-    M1 = "0." + bin1.substr(4);
-    S2 = bin2[0]; // Corrected to bin2
-    E2 = bin2.substr(1, 3); // Corrected to bin2
-    M2 = "0." + bin2.substr(4); // Corrected to bin2
 
-    // Convert 8 bits into decimal s.o.m. 2^e-4
-    int M1_decimal = binToDec(M1); // Corrected function name
-    int M2_decimal = binToDec(M2); // Corrected function name
-    int E1_decimal = stoi(E1, nullptr, 2);
-    int E2_decimal = stoi(E2, nullptr, 2);
-    int S1_decimal = stoi(S1, nullptr, 2); // Fixed from E2
-    int S2_decimal = stoi(S2, nullptr, 2); // Fixed from E2
+    float dec1 = get_decimal_by3parts(bin1);
+    float dec2 = get_decimal_by3parts(bin2);
 
-    float n1 = (-1 * S1_decimal) * M1_decimal * pow(2, (E1_decimal - 4)); // Changed ** to *
-    float n2 = (-1 * S2_decimal) * M2_decimal * pow(2, (E2_decimal - 4)); // Changed ** to *
 
-    float result = n1 + n2;
+    float sum = dec1 + dec2;
+    string binSum = sumToBin(sum);
+    string hexaSum = binToHex(binSum);
 
-    S3 = "0";
-    E3 = "100";
-    if (result < 0) {
-        result *= -1;
-        S3 = "1";
-    }
 
-    M3 = deciToBin(result);
-    if (result >= 1) {
-        E3 = "101";
-        M3 = normalizeBinary(M3); // Make sure normalizeBinary is correct
-    }
-
-    return binToHex(S3 + E3 + M3); // Corrected function name
+    return hexaSum;
 }
 
+// Add two integer hexadecimal numbers
 string ALU::addInteger(string hexa1, string hexa2) {
     string bin1 = hexToBin(hexa1);
     string bin2 = hexToBin(hexa2);
     int n1 = twosComplementToDecimal(bin1);
     int n2 = twosComplementToDecimal(bin2);
     int result = n1 + n2;
-    string binResult = decimalToTwosComplement(result); // Corrected variable name
-    return binToHex(binResult); // Corrected variable name
+    string binResult = decimalToTwosComplement(result);
+    return binToHex(binResult);
 }
 
 string ALU::hexToTwosComp(string hexa)
