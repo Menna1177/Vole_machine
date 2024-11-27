@@ -96,7 +96,7 @@ void CPU::execute(const string& opcode, const string& operand, Register& reg, Me
 
     else if (opcode == "B"){
         int targetAdd = stoi(operand.substr(2), nullptr, 16);
-        cu.jump(s, indReg0, reg, pc, targetAdd);
+        cu.jump(r, indReg0, reg, pc, targetAdd);
     }
 
     else if (opcode == "C"){
@@ -105,7 +105,7 @@ void CPU::execute(const string& opcode, const string& operand, Register& reg, Me
 
     else if (opcode == "D"){
         int targetAdd = stoi(operand.substr(2), nullptr, 16);
-        cu.jump2(s, indReg0, reg, pc, targetAdd);
+        cu.jump2(r, indReg0, reg, pc, targetAdd);
     }
 }
 
